@@ -68,9 +68,9 @@ def create_table_if_not_exists(database_service: str, table_name: str, conn: sa.
     temp_cursor =  conn.cursor()
 
     temp_cursor.execute(f'''CREATE TABLE IF NOT EXISTS {table_name}
-    (id text, title text, condition text, listing_type_id text, currency_id text,
+    (id text, title text, condition text, listing_type_id text, currency_id text, item_hz text, item_ms text,
     price {float_value}, original_price {float_value}, available_quantity {int_value}, item_color text,
-    official_store_id {float_value}, item_brand text, api_request_day {date_value});''')
+    official_store_id {float_value}, item_brand text, item_package_length text, api_request_day {date_value});''')
     conn.commit()
 
     temp_cursor.close()
@@ -113,10 +113,34 @@ if __name__ == '__main__':
             for key in [key for key in request_item.keys() if key not in keys_to_drop]:
                 control_dict[key].append(request_item[key])
 
-            control_dict['item_brand'].append(request_item['attributes'][1]['value_name'])
-            control_dict['item_color'].append(request_item['attributes'][2]['value_name'])
-
             control_dict['api_request_day'].append(today)
+
+            item_brand = None
+            item_color = None
+            item_package_length = None
+            for attribute_item in request_item['attributes']:
+
+                match attribute_item['id']:
+                    case 'BRAND': item_brand = attribute_item['value_name']
+                    case 'COLOR': item_color = attribute_item['value_name']
+                    case 'PACKAGE_LENGTH': item_package_length = attribute_item['value_name']
+                
+                if item_brand and item_color and item_package_length: break
+
+            control_dict['item_brand'].append(item_brand)
+            control_dict['item_color'].append(item_color)
+            control_dict['item_package_length'].append(item_package_length)
+
+            item_hz = None
+            item_ms = None
+            sanitized_title = request_item['sanitized_title'].split('-')
+            for item in sanitized_title:
+                if 'hz' in item: item_hz = item
+                if 'ms ' in str(item+ ' '): item_ms = item
+                if item_hz and item_ms: break
+                
+            control_dict['item_hz'].append(item_hz)
+            control_dict['item_ms'].append(item_ms)
 
     # Connects to sqlite db, creates table and insert data gathered in it
     sqlite_con = sqlt.connect(r'C:\Users\pedro\OneDrive\coding\mercado_livre_API\temp.db')
@@ -129,7 +153,6 @@ if __name__ == '__main__':
     # Insert data retrived from SQlite db into Postgres db
     # There is a reason why the data first goes into a SQlite DB and only then to a Postgres DB. Check documentation on github if you want to understand why
     db_connection = connect_to_pg_database(db_name = os.getenv('DB_NAME'), username = os.getenv('DB_USER'), password = os.getenv('DB_PASSWORD'), db_port = os.getenv('DB_PORT'), host = os.getenv('DB_HOST'))
-    db_connection.autocommit = True
     create_table_if_not_exists('postgres', 'ml_api_dados', db_connection)
     engine = sa.create_engine(f'postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}')
     sqlite_table_as_df.to_sql(name='ml_api_dados', con=engine.connect(), if_exists='replace', index=False)
