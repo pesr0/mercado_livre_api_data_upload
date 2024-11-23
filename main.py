@@ -7,7 +7,7 @@ import sqlite3 as sqlt
 import sqlalchemy as sa
 
 from tqdm import tqdm
-from datetime import date
+from datetime import datetime
 from collections import defaultdict
 
 def connect_to_pg_database(db_name: str, username: str, password: str, db_port: str, host: str):
@@ -63,7 +63,7 @@ def create_table_if_not_exists(database_service: str, table_name: str, conn: sa.
     if database_service == 'postgres':
         int_value = 'int4'
         float_value = 'float8'
-        date_value = 'date'
+        date_value = 'timestamp'
 
     temp_cursor =  conn.cursor()
 
@@ -95,7 +95,7 @@ if __name__ == '__main__':
     # dict for rows appending, in order to create the df in one single step at the end
     control_dict = defaultdict(list)
 
-    today = date.today()
+    timestamp = datetime.now()
 
     # since our limit of items per request is 50, we need to make at least groups_of_50 iterations to get all of the items
     for api_call in tqdm(range(groups_of_50+2)):
@@ -113,7 +113,7 @@ if __name__ == '__main__':
             for key in [key for key in request_item.keys() if key not in keys_to_drop]:
                 control_dict[key].append(request_item[key])
 
-            control_dict['api_request_day'].append(today)
+            control_dict['api_request_day'].append(timestamp)
 
             item_brand = None
             item_color = None
@@ -138,7 +138,7 @@ if __name__ == '__main__':
                 if 'hz' in item: item_hz = item
                 if 'ms ' in str(item+ ' '): item_ms = item
                 if item_hz and item_ms: break
-                
+
             control_dict['item_hz'].append(item_hz)
             control_dict['item_ms'].append(item_ms)
 
