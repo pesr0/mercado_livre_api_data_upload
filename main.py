@@ -164,4 +164,4 @@ if __name__ == '__main__':
         sqlite_table_as_df.to_sql(name='ml_api_dados', con=engine.connect(), if_exists='replace', index=False)
 
         print(f'Iteration Over: {timestamp}\n\n')
-        time.sleep(5)
+        time.sleep(12*3600)
