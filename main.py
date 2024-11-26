@@ -158,4 +158,4 @@ if __name__ == '__main__':
         create_table_if_not_exists('postgres', 'ml_api_dados', db_connection)
         engine = sa.create_engine(f'postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}')
         sqlite_table_as_df.to_sql(name='ml_api_dados', con=engine.connect(), if_exists='replace', index=False)
-        time.sleep(24*3600)
+        time.sleep(60)
