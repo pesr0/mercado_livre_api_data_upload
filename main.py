@@ -87,6 +87,8 @@ if __name__ == '__main__':
     'thumbnail_id', 'catalog_product_id', 'sanitized_title', 'buying_mode', 'site_id', 'category_id', 'order_backend', 'use_thumbnail_id', 'accepts_mercadopago', 'stop_time', 
     'catalog_listing','winner_item_id', 'discounts', 'decorations', 'inventory_id', 'permalink', 'domain_id', 'thumbnail']
 
+    print('\n')
+
     while True:
         api_request = call_ml_api(category_id='MLB99245')
 
@@ -98,6 +100,8 @@ if __name__ == '__main__':
         control_dict = defaultdict(list)
 
         timestamp = datetime.now()
+
+        print('API Request Progress:')
 
         # since our limit of items per request is 50, we need to make at least groups_of_50 iterations to get all of the items
         for api_call in tqdm(range(groups_of_50+2)):
@@ -158,4 +162,6 @@ if __name__ == '__main__':
         create_table_if_not_exists('postgres', 'ml_api_dados', db_connection)
         engine = sa.create_engine(f'postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}')
         sqlite_table_as_df.to_sql(name='ml_api_dados', con=engine.connect(), if_exists='replace', index=False)
-        time.sleep(60)
+
+        print(f'Iteration Over: {timestamp}\n\n')
+        time.sleep(5)
