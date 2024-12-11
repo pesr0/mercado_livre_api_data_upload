@@ -85,7 +85,7 @@ if __name__ == '__main__':
     # fields dropped from the API request (these fields are either not useful for us or are composed by data structures which need to be treated first)
     keys_to_drop = ['sale_price', 'shipping', 'seller', 'address', 'attributes', 'installments', 'promotions', 'official_store_name', 'variations_data', 'variation_filters', 
     'thumbnail_id', 'catalog_product_id', 'sanitized_title', 'buying_mode', 'site_id', 'category_id', 'order_backend', 'use_thumbnail_id', 'accepts_mercadopago', 'stop_time', 
-    'catalog_listing','winner_item_id', 'discounts', 'decorations', 'inventory_id', 'permalink', 'domain_id', 'thumbnail']
+    'catalog_listing','winner_item_id', 'discounts', 'decorations', 'inventory_id', 'permalink', 'domain_id', 'thumbnail', 'variation_id']
 
     print('\n')
 
@@ -152,6 +152,7 @@ if __name__ == '__main__':
         sqlite_con = sqlt.connect(r'C:\Users\pedro\OneDrive\coding\mercado_livre_API\temp.db')
         create_table_if_not_exists('sqlite', 'ml_api_dados', sqlite_con)
         sqlite_engine = sa.create_engine(r"sqlite:///C:\Users\pedro\OneDrive\coding\mercado_livre_API\temp.db")
+        print(control_dict.keys())
         pd.DataFrame(control_dict).to_sql(name='ml_api_dados', con=sqlite_engine.connect(), if_exists='append', index=False)
 
         sqlite_table_as_df = pd.read_sql_query('SELECT * FROM ml_api_dados', sqlite_con)
